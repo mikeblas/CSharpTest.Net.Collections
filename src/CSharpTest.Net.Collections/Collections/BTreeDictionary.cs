@@ -452,6 +452,15 @@ namespace CSharpTest.Net.Collections
             Seek(_root, start, out result);
             return new Enumerator(result.Parent, result.ParentIx);
         }
+        /// <summary>
+        /// Inclusivly enumerates from start key to the start of the collection
+        /// </summary>
+        public IEnumerable<KeyValuePair<TKey, TValue>> EnumerateFromReverse(TKey start)
+        {
+            SeekResult result;
+            Seek(_root, start, out result, true);
+            return new ReverseEnumerator(result.Parent, result.ParentIx);
+        }
 
         /// <summary>
         /// Inclusivly enumerates from start key to stop key
@@ -461,6 +470,16 @@ namespace CSharpTest.Net.Collections
             SeekResult result;
             Seek(_root, start, out result);
             return new Enumerator(result.Parent, result.ParentIx, x => (_comparer.Compare(x.Key, end) <= 0));
+        }
+
+        /// <summary>
+        /// Inclusivly enumerates from end key to start key (reverse)
+        /// </summary>
+        public IEnumerable<KeyValuePair<TKey, TValue>> EnumerateRangeReverse(TKey start, TKey end)
+        {
+            SeekResult result;
+            Seek(_root, end, out result, true);
+            return new ReverseEnumerator(result.Parent, result.ParentIx, x => (_comparer.Compare(x.Key, start) >= 0));
         }
 
         object ICloneable.Clone() { return Clone(); }
@@ -498,7 +517,7 @@ namespace CSharpTest.Net.Collections
             public int ParentIx;
         }
 
-        bool Seek(Node from, TKey item, out SeekResult found)
+        bool Seek(Node from, TKey item, out SeekResult found, bool forreverse = false)
         {
             found = new SeekResult();
             found.Value = default(TValue);
@@ -519,6 +538,36 @@ namespace CSharpTest.Net.Collections
             if (found.ParentIx < 0)
             {
                 found.ParentIx = ~found.ParentIx;
+
+                if (forreverse)
+                {
+                    if (found.ParentIx < found.Parent.Count)
+                    {
+                        var foundval = found.Parent.Values[found.ParentIx].Key;
+                        var cmp = _comparer.Compare(foundval, item);
+                        if (cmp > 0)
+                        {
+                            found.ParentIx--;
+                            if (found.ParentIx < 0)
+                            {
+                                if (found.Parent.Prev != null) {
+                                    found.Parent = found.Parent.Prev;
+                                    found.ParentIx = found.Parent.Count - 1;
+                                } else
+                                {
+                                    found.ParentIx = -1;
+                                }
+
+                            }
+
+
+                        }
+
+
+                    }
+
+                }
+
                 return false;
             }
 
@@ -754,6 +803,72 @@ namespace CSharpTest.Net.Collections
             { return this; }
             [Obsolete]
             System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() 
+            { return this; }
+        }
+        #endregion
+        #region class ReverseEnumerator
+        class ReverseEnumerator : IEnumerator<KeyValuePair<TKey, TValue>>, IEnumerable<KeyValuePair<TKey, TValue>>
+        {
+            private readonly Node _start;
+            private readonly int _startIx;
+            private readonly Predicate<KeyValuePair<TKey, TValue>> _fnContinue;
+            private Node _current;
+            private int _index;
+            private bool _valid;
+
+            public ReverseEnumerator(Node start, int index) : this(start, index, null) { }
+            public ReverseEnumerator(Node start, int index, Predicate<KeyValuePair<TKey, TValue>> fnContinue)
+            {
+                _start = start;
+                _startIx = index;
+                if (_start != null)
+                {
+                    if (_startIx >= _start.Count)
+                        _startIx = _start.Count - 1;
+                }
+                _fnContinue = fnContinue;
+                Reset();
+            }
+            public void Reset()
+            {
+                _valid = false;
+                _current = _start;
+                _index = _startIx + 1;
+            }
+            public bool MoveNext()
+            {
+                if (_current == null) return false;
+
+                if (--_index < 0)
+                {
+                    _current = _current.Prev;
+                    if (_current != null)
+                        _index = _current.Count - 1;
+                }
+                _valid = _current != null && _index >= 0 && _index < _current.Count;
+                if (_valid && _fnContinue != null && !_fnContinue(Current))
+                    _valid = false;
+                return _valid;
+            }
+            [Obsolete]
+            object System.Collections.IEnumerator.Current { get { return Current; } }
+            public KeyValuePair<TKey, TValue> Current
+            {
+                get
+                {
+                    if (_valid)
+                        return _current.Values[_index];
+                    throw new InvalidOperationException();
+                }
+            }
+            public void Dispose()
+            { }
+
+            [Obsolete]
+            IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator()
+            { return this; }
+            [Obsolete]
+            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
             { return this; }
         }
         #endregion
