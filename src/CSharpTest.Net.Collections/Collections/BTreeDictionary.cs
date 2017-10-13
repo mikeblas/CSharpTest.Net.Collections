@@ -182,6 +182,22 @@ namespace CSharpTest.Net.Collections
         }
 
         /// <summary>
+        /// Tries to add set of items, ignores duplicates
+        /// </summary>
+        /// <param name="items"></param>
+        /// <returns>Count that was added</returns>
+        public int TryAddRange(IEnumerable<KeyValuePair<TKey, TValue>> items)
+        {
+            int added = 0;
+            Modify();
+            foreach (KeyValuePair<TKey, TValue> pair in items)
+                if (TryAdd(pair.Key, pair.Value)) added++;
+
+            return added;
+
+        }
+
+        /// <summary>
         /// Determines whether the <see cref="T:System.Collections.Generic.IDictionary`2"/> contains an element with the specified key.
         /// </summary>
         /// <returns>
