@@ -174,13 +174,18 @@ namespace CSharpTest.Net.Collections
                 }
                 finally
                 {
-                    if (locked)
-                        _selfLock.ReleaseWrite();
-                    //Do not dispose, this may be a shared lock:
-                    //_selfLock.Dispose();
-
-                    if (_options.LogFile != null)
-                        _options.LogFile.Dispose();
+                    try
+                    {
+                        if (_options.LogFile != null)
+                            _options.LogFile.Dispose();
+                    }
+                    finally
+                    {
+                        if (locked)
+                            _selfLock.ReleaseWrite();
+                        //Do not dispose, this may be a shared lock:
+                        //_selfLock.Dispose();
+                    }
                 }
             }
             finally
@@ -362,8 +367,19 @@ namespace CSharpTest.Net.Collections
                 _methodName = methodName;
                 _exclusive = exclusiveTreeAccess;
                 _locked = _exclusive ? _tree._selfLock.TryWrite(tree._options.LockTimeout) : _tree._selfLock.TryRead(tree._options.LockTimeout);
-                Assert(_locked);
-                Pin = _tree._storage.LockRoot(type);
+                LockTimeoutException.Assert(_locked);
+                try
+                {
+                    Pin = _tree._storage.LockRoot(type);
+                }
+                catch
+                {
+                    if (_exclusive)
+                        _tree._selfLock.ReleaseWrite();
+                    else
+                        _tree._selfLock.ReleaseRead();
+                    throw;
+                }
             }
             void IDisposable.Dispose()
             {
