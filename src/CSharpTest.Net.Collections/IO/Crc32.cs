@@ -76,10 +76,12 @@ namespace CSharpTest.Net.IO
         {
             Check.NotNull(bytes);
             int end = start + length;
+            var temp = this._crc32;
 
             for (int i = start; i < end; i++)
-                _crc32 = (((~_crc32 >> 8) & 0x00FFFFFF) ^ Table[(_crc32 ^ bytes[i]) & 0x0ff]);
-            
+                temp = (((~temp >> 8) & 0x00FFFFFF) ^ Table[(temp ^ bytes[i]) & 0x0ff]);
+
+            _crc32 = temp;
         }
 
         /// <summary> Adds an entire array of bytes to the checksum </summary>
@@ -92,11 +94,15 @@ namespace CSharpTest.Net.IO
         /// <summary> Adds a string to the checksum as a series of 16-bit values (big endian) </summary>
         public void Add(string text)
         {
+            var temp = this._crc32;
+
             foreach (char ch in Check.NotNull(text))
             {
-                _crc32 = (((~_crc32 >> 8) & 0x00FFFFFF) ^ Table[(_crc32 ^ ((byte)ch >> 8)) & 0x0ff]);
-                _crc32 = (((~_crc32 >> 8) & 0x00FFFFFF) ^ Table[(_crc32 ^ ((byte)ch)) & 0x0ff]);
+                temp = (((~temp >> 8) & 0x00FFFFFF) ^ Table[(temp ^ ((byte)ch >> 8)) & 0x0ff]);
+                temp = (((~temp >> 8) & 0x00FFFFFF) ^ Table[(temp ^ ((byte)ch)) & 0x0ff]);
             }
+
+            _crc32 = temp;
         }
 
         /// <summary> Adds a string to the checksum as a series of 16-bit values </summary>
