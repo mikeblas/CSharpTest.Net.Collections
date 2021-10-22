@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using CSharpTest.Net.Interfaces;
 using CSharpTest.Net.Serialization;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace CSharpTest.Net.Collections
 {
@@ -28,7 +29,7 @@ namespace CSharpTest.Net.Collections
             private readonly LurchTable<IStorageHandle, object> _cache, _dirty;
 
             private readonly ThreadStart _writeBehindFunc;
-            private IAsyncResult _asyncWriteBehind;
+            private Task _asyncWriteBehind;
             private readonly int _asyncThreshold;
 
             ISerializer<Node> _serializer;
@@ -100,7 +101,7 @@ namespace CSharpTest.Net.Collections
                 if (completion != null && !completion.IsCompleted)
                 {
                     _asyncWriteBehind = null;
-                    _writeBehindFunc.EndInvoke(completion);
+                    completion.Wait();
                 }
             }
 
@@ -201,7 +202,7 @@ namespace CSharpTest.Net.Collections
                     lock (_writeBehindFunc)
                     {
                         if (completion == null || completion.IsCompleted)
-                            _asyncWriteBehind = _writeBehindFunc.BeginInvoke(null, null);
+                            _asyncWriteBehind = Task.Run(() => _writeBehindFunc());
                     }
                 }
             }
