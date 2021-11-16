@@ -73,7 +73,7 @@ namespace CSharpTest.Net.Library.Test
             Guid id2 = NextHashCollision(id1);
 
             Assert.AreNotEqual(id1, id2);
-            Assert.AreEqual(id1.GetHashCode(), id2.GetHashCode());
+            Assert.AreEqual(GuidToInt(id1), GuidToInt(id2));
         }
 
         [Test]
@@ -235,8 +235,17 @@ namespace CSharpTest.Net.Library.Test
             );
 
             Guid result = new Guid(bytes);
-            Assert.AreEqual(guid.GetHashCode(), result.GetHashCode());
+            //return a ^ (((int)_b << 16) | (int)(ushort)_c) ^ (((int)_f << 24) | _k);
+            Assert.AreEqual(GuidToInt(guid), GuidToInt(result));
             return result;
+        }
+
+        public static int GuidToInt(Guid guid) {
+            var bytes = guid.ToByteArray();
+            var a = BitConverter.ToInt32(bytes);
+            var b = BitConverter.ToInt16(bytes, 4);
+            var c = BitConverter.ToInt16(bytes, 6);
+            return a ^ ((b << 16) | (ushort)c) ^ ((bytes[10] << 24) | bytes[15]);
         }
 
         public static Guid[] CreateSample(Guid seed, int size, double collisions)
