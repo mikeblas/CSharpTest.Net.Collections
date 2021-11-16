@@ -64,6 +64,7 @@ namespace CSharpTest.Net.Library.Test.LockingTests
                 _locked = false;
                 _complete.Set();
                 _tokenSource.Cancel();
+                _async.Wait();
             }
         }
 
