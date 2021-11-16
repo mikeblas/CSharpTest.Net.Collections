@@ -35,38 +35,14 @@ namespace CSharpTest.Net.Crypto
                 return new Hash(algo.ComputeHash(data == null ? Empty : data));
         }
 
-        private static Hash Create<T>(Stream data)
-            where T : HashAlgorithm, new()
-        {
-            using (data)
-            using (T algo = new T())
-                return new Hash(algo.ComputeHash(data == null ? Stream.Null : data));
+        private static Hash Create(byte[] data){
+            using (var algo = System.Security.Cryptography.SHA256.Create())
+                return new Hash(algo.ComputeHash(data == null ? Empty : data));
         }
 
-        /// <summary> Computes an MD5 hash </summary>
-        public static Hash MD5(byte[] bytes) { return Create<MD5CryptoServiceProvider>(bytes); }
-        /// <summary> Computes an MD5 hash </summary>
-        public static Hash MD5(Stream bytes) { return Create<MD5CryptoServiceProvider>(bytes); }
-
-        /// <summary> Computes an SHA1 hash </summary>
-        public static Hash SHA1(byte[] bytes) { return Create<SHA1Managed>(bytes); }
-        /// <summary> Computes an SHA1 hash </summary>
-        public static Hash SHA1(Stream bytes) { return Create<SHA1Managed>(bytes); }
-
+  
         /// <summary> Computes an SHA256 hash </summary>
-        public static Hash SHA256(byte[] bytes) { return Create<SHA256Managed>(bytes); }
-        /// <summary> Computes an SHA256 hash </summary>
-        public static Hash SHA256(Stream bytes) { return Create<SHA256Managed>(bytes); }
-
-        /// <summary> Computes an SHA384 hash </summary>
-        public static Hash SHA384(byte[] bytes) { return Create<SHA384Managed>(bytes); }
-        /// <summary> Computes an SHA384 hash </summary>
-        public static Hash SHA384(Stream bytes) { return Create<SHA384Managed>(bytes); }
-
-        /// <summary> Computes an SHA512 hash </summary>
-        public static Hash SHA512(byte[] bytes) { return Create<SHA512Managed>(bytes); }
-        /// <summary> Computes an SHA512 hash </summary>
-        public static Hash SHA512(Stream bytes) { return Create<SHA512Managed>(bytes); }
+        public static Hash SHA256(byte[] bytes) { return Create(bytes); }
 
         /// <summary> Creates a comparable Hash object from the given hashcode bytes </summary>
         public static Hash FromBytes(byte[] bytes) { return new Hash((byte[])bytes.Clone()); }

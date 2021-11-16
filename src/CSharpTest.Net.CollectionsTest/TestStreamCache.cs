@@ -151,17 +151,12 @@ namespace CSharpTest.Net.Library.Test
             Stream stream;
             using (StreamCache cache = new StreamCache(new SharedMemoryStream(), 1))
             {
-                if(true)
-                {
-                    stream = cache.Open();
+                using (stream = cache.Open())
                     stream.Write(new byte[100], 25, 55);
-                    stream = null;//simulated "accidental" object abandonment... i.e. someone does something stupid.
-                }
-
+                stream = null;//simulated "accidental" object abandonment... i.e. someone does something stupid.
                 GC.Collect(0, GCCollectionMode.Forced);
                 GC.WaitForPendingFinalizers();
-
-                Thread t = new Thread(
+                var t = new Thread(
                     delegate()
                     {
                         using (stream = cache.Open(FileAccess.Read))
@@ -250,42 +245,44 @@ namespace CSharpTest.Net.Library.Test
             }
         }
 
-        [Test, ExpectedException(typeof(ArgumentOutOfRangeException))]
+        [Test]
         public void TestFileStreamInvalidBufferSize()
         {
-            using (TempFile tempFile = new TempFile())
-            {
-                FileStreamFactory factory = new FileStreamFactory(tempFile.TempPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, 0);
-                Assert.AreEqual(tempFile.TempPath, factory.FileName);
-                factory.Create().Dispose();
-                Assert.Fail();
-            }
-        }
-
-        [Test, ExpectedException(typeof(ArgumentException))]
-        public void TestFileStreamInvalidAccessWithMode()
-        {
-            using (TempFile tempFile = new TempFile())
-            {
-                FileStreamFactory factory = new FileStreamFactory(tempFile.TempPath, FileMode.Create, FileAccess.Read);
-                Assert.AreEqual(tempFile.TempPath, factory.FileName);
-                factory.Create().Dispose();
-                Assert.Fail();
-            }
-        }
-
-        [Test, ExpectedException(typeof(IOException))]
-        public void TestFileStreamInvalidFileShare()
-        {
-            using (TempFile tempFile = new TempFile())
-            {
-                FileStreamFactory factory = new FileStreamFactory(tempFile.TempPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
-                using (factory.Create())
-                {
+            Assert.Throws<ArgumentOutOfRangeException>(() => {
+                using (TempFile tempFile = new TempFile()) {
+                    FileStreamFactory factory = new FileStreamFactory(tempFile.TempPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, -1);
+                    Assert.AreEqual(tempFile.TempPath, factory.FileName);
                     factory.Create().Dispose();
                     Assert.Fail();
                 }
-            }
+            });
+        }
+
+        [Test]
+        public void TestFileStreamInvalidAccessWithMode()
+        {
+            Assert.Throws<ArgumentException>(() => {
+                using (TempFile tempFile = new TempFile()) {
+                    FileStreamFactory factory = new FileStreamFactory(tempFile.TempPath, FileMode.Create, FileAccess.Read);
+                    Assert.AreEqual(tempFile.TempPath, factory.FileName);
+                    factory.Create().Dispose();
+                    Assert.Fail();
+                }
+            });
+        }
+
+        [Test]
+        public void TestFileStreamInvalidFileShare()
+        {
+            Assert.Throws<IOException>(() => {
+                using (TempFile tempFile = new TempFile()) {
+                    FileStreamFactory factory = new FileStreamFactory(tempFile.TempPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+                    using (factory.Create()) {
+                        factory.Create().Dispose();
+                        Assert.Fail();
+                    }
+                }
+            });
         }
     }
 }

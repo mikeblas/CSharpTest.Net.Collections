@@ -333,19 +333,19 @@ namespace CSharpTest.Net.Library.Test
             }
         }
 
-        [Test, ExpectedException(typeof(ArgumentOutOfRangeException ))]
+        [Test]
         public void TestExceedWriteMax()
         {
-            using (TempFile temp = new TempFile())
-            {
-                var options = new TransactedCompoundFile.Options(temp.TempPath) {BlockSize = 512};
-                byte[] sample = new byte[options.MaxWriteSize + 1];
-                new Random().NextBytes(sample);
-                using (TransactedCompoundFile file = new TransactedCompoundFile(options))
-                {
-                    file.Write(file.Create(), sample, 0, sample.Length);
+            Assert.Throws<ArgumentOutOfRangeException>(() => {
+                using (TempFile temp = new TempFile()) {
+                    var options = new TransactedCompoundFile.Options(temp.TempPath) { BlockSize = 512 };
+                    byte[] sample = new byte[options.MaxWriteSize + 1];
+                    new Random().NextBytes(sample);
+                    using (TransactedCompoundFile file = new TransactedCompoundFile(options)) {
+                        file.Write(file.Create(), sample, 0, sample.Length);
+                    }
                 }
-            }
+            });
         }
 
         [Test]

@@ -150,7 +150,7 @@ namespace CSharpTest.Net.IO
         /// <summary>
         /// Disposes of the temporary file
         /// </summary>
-        [DebuggerNonUserCode]
+       [DebuggerNonUserCode]
         protected virtual void Dispose(bool disposing)
         {
             try

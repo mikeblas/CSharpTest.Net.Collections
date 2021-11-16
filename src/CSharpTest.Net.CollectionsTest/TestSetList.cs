@@ -316,78 +316,87 @@ namespace CSharpTest.Net.Library.Test
     public partial class TestSetListNegative
     {
         [Test]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void TestBadCapacity()
         {
-            IList list = new SetList<string>(-1);
+            Assert.Throws<ArgumentOutOfRangeException>(() => {
+                IList list = new SetList<string>(-1);
+            });
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void TestBadEnumerable()
         {
-            IEnumerable<string> novalue = null;
-            IList list = new SetList<string>(novalue);
+            Assert.Throws<ArgumentNullException>(() => {
+                IEnumerable<string> novalue = null;
+                IList list = new SetList<string>(novalue);
+            });
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void TestBadComparer()
         {
-            IComparer<string> novalue = null;
-            IList list = new SetList<string>(novalue);
+            Assert.Throws<ArgumentNullException>(() => {
+                IComparer<string> novalue = null;
+                IList list = new SetList<string>(novalue);
+            });
         }
 
         [Test]
-        [ExpectedException(typeof(NotSupportedException))]
         public void TestInsertAt()
         {
-            IList list = new SetList<string>(StringComparer.Ordinal);
-            list.Insert(0, "");
+            Assert.Throws<NotSupportedException>(() => {
+                IList list = new SetList<string>(StringComparer.Ordinal);
+                list.Insert(0, "");
+            });
         }
 
         [Test]
-        [ExpectedException(typeof(NotSupportedException))]
         public void TestInsertAt2()
         {
-            IList<string> list = new SetList<string>(StringComparer.Ordinal);
-            list.Insert(0, "");
+            Assert.Throws<NotSupportedException>(() => {
+                IList<string> list = new SetList<string>(StringComparer.Ordinal);
+                list.Insert(0, "");
+            });
         }
 
         [Test]
-        [ExpectedException(typeof(NotSupportedException))]
         public void TestSetIndex()
         {
-            IList list = new SetList<string>();
-            list.Add("");
-            Assert.AreEqual("", list[0]);
-            list[0] = "error";
+            Assert.Throws<NotSupportedException>(() => {
+                IList list = new SetList<string>();
+                list.Add("");
+                Assert.AreEqual("", list[0]);
+                list[0] = "error";
+            });
         }
 
         [Test]
-        [ExpectedException(typeof(NotSupportedException))]
         public void TestSetIndex2()
         {
-            SetList<string> list = new SetList<string>();
-            list.Add("");
-            Assert.AreEqual("", list[0]);
-            list[0] = "error";
+            Assert.Throws<NotSupportedException>(() => {
+                SetList<string> list = new SetList<string>();
+                list.Add("");
+                Assert.AreEqual("", list[0]);
+                list[0] = "error";
+            });
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentException))]
         public void TestBadArgumentTypeForAdd()
         {
-            IList list = new SetList<string>();
-            list.Add(5);
+            Assert.Throws<ArgumentException>(() => {
+                IList list = new SetList<string>();
+                list.Add(5);
+            });
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentException))]
         public void TestBadArgumentTypeForRemove()
         {
-            IList list = new SetList<string>();
-            list.Remove(5);
+            Assert.Throws<ArgumentException>(() => {
+                IList list = new SetList<string>();
+                list.Remove(5);
+            });
         }
     }
 }

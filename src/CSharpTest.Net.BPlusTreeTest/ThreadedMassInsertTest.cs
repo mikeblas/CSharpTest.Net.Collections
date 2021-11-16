@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 using CSharpTest.Net.Collections;
 using CSharpTest.Net.IO;
 using CSharpTest.Net.Serialization;
@@ -42,7 +43,7 @@ namespace CSharpTest.Net.BPlusTree.Test
                 using (BPlusTree<Guid, TestInfo> tree = new BPlusTree<Guid, TestInfo>(options))
                 {
                     tree.EnableCount();
-                    var actions = new List<IAsyncResult>();
+                    var actions = new List<Task>();
                     var tests = new Action<BPlusTree<Guid, TestInfo>>[] 
                     {
                         DeleteStuff, UpdateStuff, AddStuff, AddRanges, BulkyInserts,
@@ -50,7 +51,7 @@ namespace CSharpTest.Net.BPlusTree.Test
                     };
 
                     foreach (var t in tests)
-                        actions.Add(t.BeginInvoke(tree, null, null));
+                        actions.Add(Task.Run(()=>t(tree)));
 
                     do
                     {
@@ -61,7 +62,7 @@ namespace CSharpTest.Net.BPlusTree.Test
                     mreStop.Set();
                     for (int i = 0; i < actions.Count; i++)
                     {
-                        tests[i].EndInvoke(actions[i]);
+                        actions[i].Wait(1000);
                     }
 
                     Trace.TraceInformation("Dictionary.Count = {0}", tree.Count);

@@ -119,14 +119,16 @@ namespace CSharpTest.Net.Library.Test
             Interlocked.Decrement(ref counters[0]);
         }
 
-        [Test, ExpectedException(typeof(ObjectDisposedException))]
+        [Test]
         public void TestEnqueueAfterDispose()
         {
-            int counter = 0;
-            WorkQueue worker = new WorkQueue(1);
-            worker.Complete(false, 100);
-            worker.Enqueue(delegate() { counter++; });
-            Assert.Fail("Enqueue after Dispose()", counter);
+            Assert.Throws<ObjectDisposedException>(() => {
+                int counter = 0;
+                WorkQueue worker = new WorkQueue(1);
+                worker.Complete(false, 100);
+                worker.Enqueue(delegate () { counter++; });
+                Assert.Fail("Enqueue after Dispose()", counter);
+            });
         }
     }
 }

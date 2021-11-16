@@ -38,37 +38,31 @@ namespace CSharpTest.Net.Library.Test.LockingTests
             using (l.Read())
                 Assert.IsFalse(l.TryWrite(10));
         }
-        [Test, ExpectedException(typeof(InvalidOperationException))]
+        [Test]
         public void DisposedWithReaders()
         {
-            ILockStrategy l = LockFactory.Create();
-            ThreadedReader thread = new ThreadedReader(l);
-            try
-            {
-                l.Dispose();
-            }
-            finally
-            {
-                try { thread.Dispose(); }
-                catch (ObjectDisposedException)
-                { }
-            }
+            Assert.Throws<InvalidOperationException>(() => {
+                ILockStrategy l = LockFactory.Create();
+                ThreadedReader thread = new ThreadedReader(l);
+                try {
+                    l.Dispose();
+                } finally {
+                    try { thread.Dispose(); } catch (ObjectDisposedException) { }
+                }
+            });
         }
-        [Test, ExpectedException(typeof(InvalidOperationException))]
+        [Test]
         public void DisposedWithWriters()
         {
-            ILockStrategy l = LockFactory.Create();
-            ThreadedWriter thread = new ThreadedWriter(l);
-            try
-            {
-                l.Dispose();
-            }
-            finally
-            {
-                try { thread.Dispose(); }
-                catch (ObjectDisposedException)
-                { }
-            }
+            Assert.Throws<InvalidOperationException>(() => {
+                ILockStrategy l = LockFactory.Create();
+                ThreadedWriter thread = new ThreadedWriter(l);
+                try {
+                    l.Dispose();
+                } finally {
+                    try { thread.Dispose(); } catch (ObjectDisposedException) { }
+                }
+            });
         }
     }
 }

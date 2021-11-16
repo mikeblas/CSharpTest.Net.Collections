@@ -36,7 +36,7 @@ namespace CSharpTest.Net.Library.Test.LockingTests
                 using (new ThreadedReader(l))
                     Assert.IsFalse(l.TryWrite(0));
 
-                Assert.IsTrue(l.TryWrite(0));
+                Assert.IsTrue(l.TryWrite(1));
                 l.ReleaseWrite();
             }
         }
@@ -51,7 +51,7 @@ namespace CSharpTest.Net.Library.Test.LockingTests
                 using (new ThreadedWriter(l))
                     Assert.IsFalse(l.TryRead(0));
 
-                Assert.IsTrue(l.TryRead(0));
+                Assert.IsTrue(l.TryRead(1));
                 l.ReleaseRead();
             }
         }
@@ -66,7 +66,7 @@ namespace CSharpTest.Net.Library.Test.LockingTests
                 using (new ThreadedWriter(l))
                     Assert.IsFalse(l.TryWrite(0));
 
-                Assert.IsTrue(l.TryWrite(0));
+                Assert.IsTrue(l.TryWrite(1));
                 l.ReleaseWrite();
             }
         }
@@ -151,27 +151,31 @@ namespace CSharpTest.Net.Library.Test.LockingTests
             Assert.AreEqual(0, errors);
             System.Diagnostics.Trace.TraceInformation("Iterations completed: {0} * 100", iterations[0]);
         }
-        [Test, ExpectedException(typeof(TimeoutException))]
-        public void TestThreadedReadTimeout()
-        {
-            using (ILockStrategy l = LockFactory.Create())
-            {
-                using (new ThreadedWriter(l))
-                using (l.Read(0))
-                { }
-            }
+        [Test]
+        public void TestThreadedReadTimeout() {
+            Assert.That(() => {
+                using (ILockStrategy l = LockFactory.Create()) {
+                    using (new ThreadedWriter(l))
+                    using (l.Read(0)) { }
+                }
+            }, Throws.Exception);
         }
-        [Test, ExpectedException]
+        [Test]
         public void TestExcessiveReleaseWrite()
         {
-            using (ILockStrategy l = LockFactory.Create())
-                l.ReleaseWrite();
+            Assert.That(() => { 
+                using (ILockStrategy l = LockFactory.Create())
+                    l.ReleaseWrite();
+            }, Throws.Exception);
         }
-        [Test, ExpectedException]
+        [Test]
         public void TestExcessiveReleaseRead()
         {
-            using (ILockStrategy l = LockFactory.Create())
-                l.ReleaseRead();
+            Assert.That(() => {
+                using (ILockStrategy l = LockFactory.Create())
+                    l.ReleaseRead();
+            }, Throws.Exception);
+
         }
     }
 }

@@ -26,12 +26,12 @@ namespace CSharpTest.Net.Library.Test
 	public partial class TestTempFiles
 	{
 		#region TestFixture SetUp/TearDown
-		[TestFixtureSetUp]
+		[SetUp]
 		public virtual void Setup()
 		{
 		}
 
-		[TestFixtureTearDown]
+		[TearDown]
 		public virtual void Teardown()
 		{
 		}
@@ -54,17 +54,18 @@ namespace CSharpTest.Net.Library.Test
 			string filename;
 			try
 			{
-				TempFile file = new TempFile();
-				filename = file.TempPath;
-				Assert.IsTrue(File.Exists(file.TempPath));
+				using (TempFile file = new TempFile()) {
+					filename = file.TempPath;
+					Assert.IsTrue(File.Exists(file.TempPath));
 
-				IDisposable flock = file.Open();
-				file.Dispose();
+					IDisposable flock = file.Open();
+					file.Dispose();
 
-				Assert.IsTrue(File.Exists(file.TempPath));//dua, it's still open
+					Assert.IsTrue(File.Exists(file.TempPath));//dua, it's still open
 
-				flock.Dispose();
-				file = null;
+					flock.Dispose();
+				};
+				
 			}
 			finally { }
 
@@ -82,28 +83,27 @@ namespace CSharpTest.Net.Library.Test
 			string filename;
 			try
 			{
-				TempFile file = new TempFile();
-				filename = file.TempPath;
-				Assert.IsTrue(File.Exists(file.TempPath));
+				using (var file = new TempFile()) {
+					filename = file.TempPath;
+					Assert.IsTrue(File.Exists(file.TempPath));
 
-				flock = file.Open();
-				file.Dispose();
+					flock = file.Open();
+					file.Dispose();
 
-				Assert.IsTrue(File.Exists(file.TempPath));//dua, it's still open
-				file = null;
-			}
-			finally { }
+					Assert.IsTrue(File.Exists(file.TempPath));//dua, it's still open
 
-			//wait for GC to collect tempfile
-			GC.Collect(0, GCCollectionMode.Forced);
-			GC.WaitForPendingFinalizers();
+					//wait for GC to collect tempfile
+					GC.Collect(0, GCCollectionMode.Forced);
+					GC.WaitForPendingFinalizers();
 
-			Assert.IsTrue(File.Exists(filename));
+					Assert.IsTrue(File.Exists(filename));
+					flock.Dispose();
+				}
+			} finally { }
 
 			//now the finalizer should have fire, as proven by TestFinalizer(), see if the
 			//rescheduled object will finalize...
-
-			flock.Dispose();
+			
 			GC.Collect(0, GCCollectionMode.Forced);
 			GC.WaitForPendingFinalizers();
 
@@ -263,28 +263,34 @@ namespace CSharpTest.Net.Library.Test
 			Assert.AreEqual(0, f.Length);
 		}
 
-		[Test, ExpectedException(typeof(ObjectDisposedException))]
+		[Test]
 		public void TestInfoOnDisposed()
 		{
-			TempFile f = new TempFile();
-			f.Dispose();
-			f.Info.OpenText();
+			Assert.Throws<ObjectDisposedException>(() => {
+				TempFile f = new TempFile();
+				f.Dispose();
+				f.Info.OpenText();
+			});
 		}
 
-		[Test, ExpectedException(typeof(ObjectDisposedException))]
+		[Test]
 		public void TestPathOnDisposed()
 		{
-			TempFile f = new TempFile();
-			f.Dispose();
-			Assert.Fail(f.TempPath);
+			Assert.Throws<ObjectDisposedException>(() => {
+				TempFile f = new TempFile();
+				f.Dispose();
+				Assert.Fail(f.TempPath);
+			});
 		}
 
 
-		[Test, ExpectedException(typeof(ArgumentException))]
+		[Test]
 		public void TestBadPathOnAttach()
 		{
+
 			TempFile f = TempFile.Attach("@~+_(%!&($_~!(&*+%_~&^%^|||&&&\\\\ THIS IS AN INVALID FILE NAME.*");
 			f.Dispose();
+			Assert.IsFalse(f.Exists);
 		}
 
 		[Test]

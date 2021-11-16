@@ -35,7 +35,7 @@ namespace CSharpTest.Net.Library.Test.LockingTests
                 using (new ThreadedWriter(l))
                     Assert.IsFalse(l.TryWrite(0));
 
-                Assert.IsTrue(l.TryWrite(0));
+                Assert.IsTrue(l.TryWrite(1));
                 l.ReleaseWrite();
             }
         }
@@ -72,12 +72,14 @@ namespace CSharpTest.Net.Library.Test.LockingTests
         }
 
 
-        [Test, ExpectedException(typeof(TimeoutException))]
+        [Test]
         public void TestThreadedWriteTimeout()
         {
-            using (ILockStrategy l = LockFactory.Create())
-            using (new ThreadedWriter(l))
+            Assert.That(() => {
+                using (ILockStrategy l = LockFactory.Create())
+                using (new ThreadedWriter(l))
                 using (l.Write(0)) { }
+            }, Throws.Exception);
         }
     }
 }

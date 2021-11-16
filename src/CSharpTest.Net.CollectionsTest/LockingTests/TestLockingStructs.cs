@@ -48,15 +48,16 @@ namespace CSharpTest.Net.Library.Test.LockingTests
                 r.Dispose();//since the using statement has the same boxed pointer to r, we are allowed to dispose
             }
         }
-        [Test, ExpectedException(typeof(SynchronizationLockException))]
+        [Test]
         public void TestIdiotReaderUsesDispose()
         {
-            using (ILockStrategy l = LockFactory.Create())
-            using (ReadLock r = new ReadLock(l, 0))
-            {
-                Assert.IsTrue(r.HasReadLock);
-                ((IDisposable)r).Dispose(); //You cannot do this, the using statement has a 'copy' of ReadLock, don't call dispose.
-            }
+            Assert.Throws<SynchronizationLockException>(() => {
+                using (ILockStrategy l = LockFactory.Create())
+                using (ReadLock r = new ReadLock(l, 0)) {
+                    Assert.IsTrue(r.HasReadLock);
+                    ((IDisposable)r).Dispose(); //You cannot do this, the using statement has a 'copy' of ReadLock, don't call dispose.
+                }
+            });
         }
         #endregion
         #region WriteLock Tests
@@ -84,15 +85,16 @@ namespace CSharpTest.Net.Library.Test.LockingTests
                 w.Dispose();//since the using statement has the same boxed pointer to w, we are allowed to dispose
             }
         }
-        [Test, ExpectedException(typeof(SynchronizationLockException))]
+        [Test]
         public void TestIdiotWriterUsesDispose()
         {
-            using (ILockStrategy l = LockFactory.Create())
-            using (WriteLock w = new WriteLock(l, 0))
-            {
-                Assert.IsTrue(w.HasWriteLock);
-                ((IDisposable)w).Dispose(); //You cannot do this, the using statement has a 'copy' of ReadLock, don't call dispose.
-            }
+            Assert.Throws<SynchronizationLockException>(() => {
+                using (ILockStrategy l = LockFactory.Create())
+                using (WriteLock w = new WriteLock(l, 0)) {
+                    Assert.IsTrue(w.HasWriteLock);
+                    ((IDisposable)w).Dispose(); //You cannot do this, the using statement has a 'copy' of ReadLock, don't call dispose.
+                }
+            });
         }
         #endregion
         #region SafeLock Tests
@@ -110,21 +112,25 @@ namespace CSharpTest.Net.Library.Test.LockingTests
             using (new SafeLock<InvalidOperationException>(instance))
             { }
         }
-        [Test, ExpectedException(typeof(TimeoutException))]
+        [Test]
         public void TestSafeLockTimeout()
         {
-            object instance = new object();
-            using (new ThreadedWriter(new SimpleReadWriteLocking(instance)))
-            using (new SafeLock(instance, 0))
-                Assert.Fail();
+            Assert.Throws<TimeoutException>(() => {
+                object instance = new object();
+                using (new ThreadedWriter(new SimpleReadWriteLocking(instance)))
+                using (new SafeLock(instance, 0))
+                    Assert.Fail();
+            });
         }
-        [Test, ExpectedException(typeof(ArgumentOutOfRangeException))]
+        [Test]
         public void TestSafeLockTimeoutWithTException()
         {
-            object instance = new object();
-            using (new ThreadedWriter(new SimpleReadWriteLocking(instance)))
-            using (new SafeLock<ArgumentOutOfRangeException>(instance, 0))
-                Assert.Fail();
+            Assert.Throws<ArgumentOutOfRangeException>(() => {
+                object instance = new object();
+                using (new ThreadedWriter(new SimpleReadWriteLocking(instance)))
+                using (new SafeLock<ArgumentOutOfRangeException>(instance, 0))
+                    Assert.Fail();
+            });
         }
         [Test]
         public void TestYouCanDisposeSafeLock()
@@ -135,14 +141,15 @@ namespace CSharpTest.Net.Library.Test.LockingTests
                 safeLock.Dispose();//since the using statement has the same boxed pointer to r, we are allowed to dispose
             }
         }
-        [Test, ExpectedException(typeof(SynchronizationLockException))]
+        [Test]
         public void TestIdiotUsesSafeLockDispose()
         {
-            object instance = new object();
-            using (SafeLock safeLock = new SafeLock(instance, 0))
-            {
-                ((IDisposable)safeLock).Dispose();//since the using statement has the same boxed pointer to r, we are allowed to dispose
-            }
+            Assert.Throws<SynchronizationLockException>(() => {
+                object instance = new object();
+                using (SafeLock safeLock = new SafeLock(instance, 0)) {
+                    ((IDisposable)safeLock).Dispose();//since the using statement has the same boxed pointer to r, we are allowed to dispose
+                }
+            });
         }
         #endregion
     }

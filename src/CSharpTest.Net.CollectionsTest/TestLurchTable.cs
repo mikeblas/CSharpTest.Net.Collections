@@ -504,12 +504,14 @@ namespace CSharpTest.Net.Library.Test
             VerifyCollection(EqualityComparer<string>.Default, values.AsReadOnly(), dict.Values);
         }
 
-        [Test, ExpectedException(typeof(ObjectDisposedException))]
+        [Test]
         public void TestDisposed()
         {
-            IConcurrentDictionary<int, string> test = new LurchTableTest<int, string>();
-            test.Dispose();
-            test.Add(1, "");
+            Assert.Throws<ObjectDisposedException>(() => {
+                IConcurrentDictionary<int, string> test = new LurchTableTest<int, string>();
+                test.Dispose();
+                test.Add(1, "");
+            });
         }
 
         class KeyValueEquality<TKey, TValue> : IEqualityComparer<KeyValuePair<TKey, TValue>>

@@ -25,12 +25,12 @@ namespace CSharpTest.Net.Library.Test
     public class TestOrderedEnumeration
     {
         #region TestFixture SetUp/TearDown
-        [TestFixtureSetUp]
+        [SetUp]
         public virtual void Setup()
         {
         }
 
-        [TestFixtureTearDown]
+        [TearDown]
         public virtual void Teardown()
         {
         }
@@ -165,11 +165,13 @@ namespace CSharpTest.Net.Library.Test
             catch(ArgumentException) { }
         }
 
-        [Test, ExpectedException(typeof(InvalidDataException))]
+        [Test]
         public void TestUnorderedAssertion()
         {
-            new List<int>(OrderedEnumeration<int>.WithDuplicateHandling(
-                new [] { 2, 1 }, Comparer<int>.Default, DuplicateHandling.RaisesException));
+            Assert.Throws<InvalidDataException>(() => {
+                new List<int>(OrderedEnumeration<int>.WithDuplicateHandling(
+                new[] { 2, 1 }, Comparer<int>.Default, DuplicateHandling.RaisesException));
+            });
         }
 
         private static IEnumerable<byte> FailBeforeYield<T>(bool bFail)

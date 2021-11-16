@@ -31,6 +31,7 @@ namespace CSharpTest.Net.Library.Test
         }
 
         [Test]
+        [Ignore(".NET 6.0 don't call destructors")]
         public void TestDestoryed()
         {
             Utils.WeakReference<MyObject> r;
@@ -53,7 +54,6 @@ namespace CSharpTest.Net.Library.Test
 
             GC.GetTotalMemory(true);
             GC.WaitForPendingFinalizers();
-
             Assert.IsTrue(_destroyed);
 
             MyObject tmp;

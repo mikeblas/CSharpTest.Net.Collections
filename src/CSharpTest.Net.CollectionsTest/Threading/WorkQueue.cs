@@ -83,7 +83,9 @@ namespace CSharpTest.Net.Threading
             for (int i = 0; i < nThreads; i++)
             {
                 _workers[i] = new Thread(Run);
+#if WINDOWS
                 _workers[i].SetApartmentState(ApartmentState.MTA);
+#endif
                 _workers[i].IsBackground = true;
                 _workers[i].Name = String.Format("WorkQueue[{0}]", i);
                 _workers[i].Start();
@@ -117,7 +119,7 @@ namespace CSharpTest.Net.Threading
                     if (!t.Join(timeout))
                     {
                         completed = false;
-                        t.Abort();
+                        t.Interrupt();
                         if (!t.Join(10000))
                             shutdownFailed = true;
                     }

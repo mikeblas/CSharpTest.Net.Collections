@@ -43,18 +43,18 @@ namespace CSharpTest.Net.BPlusTree.Test
             Assert.AreEqual(StorageType.Custom, options.StorageType);
         }
 
-        [Test, ExpectedException(typeof(InvalidOperationException))]
-        public void TestFailedWrite()
-        {
-            BPlusTreeOptions<int, string> options = Options;
-            using (BPlusTree<int, string> tree = new BPlusTree<int, string>(options))
-            {
-                for(int i= 0; i < 10; i++ )
-                    tree[i] = i.ToString();
+        [Test]
+        public void TestFailedWrite() {
+            Assert.Throws<InvalidOperationException>(() => {
+                BPlusTreeOptions<int, string> options = Options;
+                using (BPlusTree<int, string> tree = new BPlusTree<int, string>(options)) {
+                    for (int i = 0; i < 10; i++)
+                        tree[i] = i.ToString();
 
-                ((MyNodeStore)options.StorageSystem).ReadOnly = true;
-                tree.Add(50, string.Empty);
-            }
+                    ((MyNodeStore)options.StorageSystem).ReadOnly = true;
+                    tree.Add(50, string.Empty);
+                }
+            });
         }
 
         /// <summary>

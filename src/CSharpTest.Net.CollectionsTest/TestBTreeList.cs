@@ -200,21 +200,25 @@ namespace CSharpTest.Net.Library.Test
             }
         }
 
-        [Test, ExpectedException(typeof(NotSupportedException))]
+        [Test]
         public void TestExceptionOnInsertAt()
         {
-            IList<int> tmp = new BTreeList<int>();
-            tmp.Insert(0, 0);
-            Assert.Fail("Should throw NotSupportedException");
+            Assert.Throws<NotSupportedException>(() => {
+                IList<int> tmp = new BTreeList<int>();
+                tmp.Insert(0, 0);
+                Assert.Fail("Should throw NotSupportedException");
+            });
         }
 
-        [Test, ExpectedException(typeof(NotSupportedException))]
+        [Test]
         public void TestExceptionOnModifyIndex()
         {
-            IList<int> tmp = new BTreeList<int>();
-            tmp.Add(0);
-            tmp[0] = 1;
-            Assert.Fail("Should throw NotSupportedException");
+            Assert.Throws<NotSupportedException>(() => {
+                IList<int> tmp = new BTreeList<int>();
+                tmp.Add(0);
+                tmp[0] = 1;
+                Assert.Fail("Should throw NotSupportedException");
+            });
         }
 
         [Test]

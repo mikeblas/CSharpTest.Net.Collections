@@ -14,6 +14,7 @@
 #endregion
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using CSharpTest.Net.Synchronization;
 using NUnit.Framework;
 
@@ -34,9 +35,9 @@ namespace CSharpTest.Net.Library.Test.LockingTests
     {
         private readonly ManualResetEvent _started;
         private readonly ManualResetEvent _complete;
-        private readonly IAsyncResult _async;
-        private readonly ThreadStart _delegate;
+        private readonly Task _async;
         protected readonly ILockStrategy _lck;
+        private CancellationTokenSource _tokenSource;
         private bool _locked;
 
         public ThreadedWriter(ILockStrategy lck)
@@ -45,11 +46,12 @@ namespace CSharpTest.Net.Library.Test.LockingTests
             _complete = new ManualResetEvent(false);
 
             _lck = lck;
-            _delegate = HoldLock;
-            _async = _delegate.BeginInvoke(null, null);
+            _tokenSource = new CancellationTokenSource();
+            CancellationToken token = _tokenSource.Token;
+            _async = Task.Run(HoldLock, token);
             if (!_started.WaitOne(1000, false))
             {
-                _delegate.EndInvoke(_async);
+                _tokenSource.Cancel();
                 Assert.Fail("Unable to acquire lock");
             }
             Assert.IsTrue(_locked);
@@ -61,7 +63,7 @@ namespace CSharpTest.Net.Library.Test.LockingTests
             {
                 _locked = false;
                 _complete.Set();
-                _delegate.EndInvoke(_async);
+                _tokenSource.Cancel();
             }
         }
 
