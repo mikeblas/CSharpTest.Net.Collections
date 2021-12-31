@@ -22,7 +22,7 @@ jobs:
       run: dotnet restore
       
     - name: Build solution
-      run: dotnet build  Stateless.sln --configuration Release --no-restore
+      run: dotnet build  CSharpTest.Net.Collections.sln --configuration Release --no-restore
       
     - name: Test
       run: dotnet test --no-restore --no-build --configuration Release
