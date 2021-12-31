@@ -102,7 +102,7 @@ namespace CSharpTest.Net.BPlusTree.Test
                     Assert.AreEqual(100, tree.Count);
 
                     sample = new Dictionary<Guid, TestInfo>(first);
-                    Insert(tree, sample, 7, 5000, TimeSpan.FromMinutes(2));
+                    Insert(tree, sample, 7, 5000, TimeSpan.FromMinutes(3));
 
                     Assert.AreEqual(35100, tree.Count);
 
