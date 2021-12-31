@@ -15,8 +15,6 @@ jobs:
       with:
         dotnet-version: 6.0.x
     - uses: actions/checkout@v2
-      with:
-        dotnet-version: 6.0.x
     
     - name: Install dependencies
       run: dotnet restore
@@ -32,11 +30,11 @@ jobs:
       run: dotnet pack src/CSharpTest.Net.Collections/CSharpTest.Net.Collections.csproj --version-suffix dev-${{github.run_id}} --configuration Release
     - name: Publish alpha version
       if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
-      run: dotnet nuget push src\CSharpTest.Net.Collections\bin\netstandard2.1\*.nupkg -s nuget.org --api-key ${{ secrets.NUGETAPIKEY }}
+      run: dotnet nuget push src\CSharpTest.Net.Collections\bin\*.nupkg -s nuget.org --api-key ${{ secrets.NUGETAPIKEY }}
   
     - name: Pack Release version
       if: github.ref == 'refs/heads/master' && github.event_name == 'push'
       run: dotnet pack src/CSharpTest.Net.Collections/CSharpTest.Net.Collections.csproj --configuration Release
     - name: Publish Release version
       if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-      run: dotnet nuget push src\CSharpTest.Net.Collections\bin\netstandard2.1\*.nupkg -s nuget.org --api-key ${{ secrets.NUGETAPIKEY }}
+      run: dotnet nuget push src\CSharpTest.Net.Collections\bin\*.nupkg -s nuget.org --api-key ${{ secrets.NUGETAPIKEY }}
