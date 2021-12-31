@@ -15,6 +15,8 @@
     <ErrorReport>none</ErrorReport>
     <DebugType>pdbonly</DebugType>
     <DebugSymbols>True</DebugSymbols>
+	<PackageId>CSharpTest.Net.Collections.netstandard</PackageId>
+	<PackageProjectUrl>https://github.com/josellm/CSharpTest.Net.Collections</PackageProjectUrl>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
 	<DefineConstants>_WINDOWS</DefineConstants>
